@@ -2,121 +2,986 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Instalador Ultra Pirata 3000</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BASTARDO IMBÉCIL™ - Instalador Ultra Pirata 3000</title>
+
 <style>
-body{margin:0;overflow:hidden;background:#000;color:#fff;font-family:Consolas}
-#bg{position:fixed;inset:0;background:radial-gradient(circle,#222,#000);}
-#steam{position:fixed;width:64px;left:20px;top:20px;animation:spin 3s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-#win{position:absolute;width:850px;height:560px;background:#c0c0c0;border:4px solid #fff;
-box-shadow:0 0 30px cyan;color:#000}
-#title{height:34px;background:#0044cc;color:#fff;padding:8px;font-weight:bold}
-#screen{position:relative;margin:8px;height:420px;background:#000;overflow:hidden}
-#doom{width:100%;height:100%;object-fit:cover}
-#troll{position:absolute;left:365px;top:118px;width:115px;
-animation:head .25s infinite alternate ease-in-out;
-filter:drop-shadow(0 0 6px #fff)}
-@keyframes head{
-0%{transform:rotate(-6deg) translateY(-2px)}
-50%{transform:rotate(5deg) translateY(2px)}
-100%{transform:rotate(-3deg)}
+* {
+  box-sizing: border-box;
+  user-select: none;
 }
-#status{padding:8px;font-weight:bold}
-#panel{position:fixed;right:20px;top:20px;width:320px;background:#000;border:2px solid lime;
-padding:10px;color:lime;font-size:13px;display:none}
-.fake{position:fixed;background:#ddd;color:#000;padding:8px;border:3px outset #fff;
-font-weight:bold;box-shadow:0 0 15px magenta}
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: "Courier New", Consolas, monospace;
+  color: white;
+}
+
+/* =========================
+   PANTALLA CMD INICIAL
+========================= */
+
+#bootScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #000;
+  color: #00ff66;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  text-shadow: 0 0 8px #00ff66;
+}
+
+.bootBox {
+  width: min(1050px, 96vw);
+  border: 2px solid #00ff66;
+  padding: 24px;
+  box-shadow: 0 0 25px #00ff66;
+  background: rgba(0,0,0,.92);
+}
+
+.ascii {
+  white-space: pre;
+  font-size: clamp(9px, 1.4vw, 17px);
+  line-height: 1.1;
+  color: #00ff66;
+  text-align: left;
+}
+
+.bootText {
+  margin-top: 18px;
+  white-space: pre-line;
+  font-size: clamp(14px, 2vw, 19px);
+  color: #d8ffe7;
+}
+
+.cmdLine {
+  margin-top: 18px;
+  color: #00ffff;
+}
+
+.cursor {
+  display: inline-block;
+  width: 12px;
+  background: #00ff66;
+  animation: blinkCursor .7s infinite;
+}
+
+@keyframes blinkCursor {
+  0%, 45% { opacity: 1; }
+  46%, 100% { opacity: 0; }
+}
+
+.loadingWrap {
+  margin-top: 20px;
+}
+
+.loadingLabel {
+  margin-bottom: 7px;
+  color: #fff;
+}
+
+.loadingBar {
+  width: 100%;
+  height: 28px;
+  border: 2px solid #00ff66;
+  background: #001a08;
+  overflow: hidden;
+  box-shadow: inset 0 0 18px #00ff66;
+}
+
+.loadingFill {
+  height: 100%;
+  width: 0%;
+  background: repeating-linear-gradient(
+    90deg,
+    #00ff66 0 16px,
+    #009933 16px 20px
+  );
+  transition: width .08s linear;
+}
+
+.bootPercent {
+  margin-top: 8px;
+  color: #fff;
+}
+
+/* =========================
+   FONDO CAÓTICO
+========================= */
+
+#mainChaos {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .7s;
+}
+
+#mainChaos.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.stars {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(white 1px, transparent 1px),
+    radial-gradient(cyan 1px, transparent 1px),
+    radial-gradient(red 1px, transparent 1px),
+    radial-gradient(yellow 1px, transparent 1px);
+  background-size: 90px 90px, 140px 140px, 200px 200px, 260px 260px;
+  animation: space 8s linear infinite;
+  opacity: .9;
+}
+
+@keyframes space {
+  from { background-position: 0 0, 0 0, 0 0, 0 0; }
+  to { background-position: 420px 260px, -320px 490px, 590px -380px, -400px -250px; }
+}
+
+.rgbFog {
+  position: fixed;
+  inset: -20%;
+  background:
+    conic-gradient(from 0deg, red, yellow, lime, cyan, blue, magenta, red);
+  filter: blur(90px);
+  opacity: .18;
+  animation: spinFog 8s linear infinite;
+}
+
+@keyframes spinFog {
+  to { transform: rotate(360deg); }
+}
+
+/* =========================
+   VENTANA PRINCIPAL
+========================= */
+
+.window {
+  position: absolute;
+  width: min(880px, 94vw);
+  height: min(590px, 88vh);
+  left: 80px;
+  top: 60px;
+  background: #c0c0c0;
+  color: black;
+  border: 4px solid white;
+  box-shadow: 0 0 35px #00ffff, 0 0 80px #ff00ff;
+  z-index: 10;
+}
+
+.titlebar {
+  height: 38px;
+  background: linear-gradient(90deg, #0000aa, #0055ff);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  font-weight: bold;
+  font-size: clamp(15px, 2vw, 22px);
+  color: white;
+}
+
+.titlebar img {
+  width: 28px;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.buttons span {
+  display: inline-block;
+  width: 28px;
+  height: 26px;
+  background: #ddd;
+  color: black;
+  text-align: center;
+  border: 2px outset white;
+  margin-left: 3px;
+  cursor: pointer;
+}
+
+.screen {
+  position: relative;
+  height: calc(100% - 150px);
+  margin: 8px;
+  background: black;
+  overflow: hidden;
+  border: 3px inset #777;
+}
+
+.doom {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+.troll {
+  position: absolute;
+  width: clamp(92px, 13vw, 145px);
+  left: 50%;
+  top: 27%;
+  transform: translate(-50%, -50%);
+  animation: headDance .30s infinite alternate ease-in-out;
+  filter: drop-shadow(0 0 8px white);
+}
+
+@keyframes headDance {
+  0% { transform: translate(-50%, -50%) rotate(-7deg) scale(1); }
+  50% { transform: translate(-50%, -53%) rotate(8deg) scale(1.08); }
+  100% { transform: translate(-50%, -49%) rotate(-4deg) scale(.99); }
+}
+
+.bigText {
+  position: absolute;
+  top: 18px;
+  width: 100%;
+  text-align: center;
+  color: #00ff00;
+  font-size: clamp(16px, 2.8vw, 28px);
+  font-weight: bold;
+  text-shadow: 0 0 8px lime, 3px 3px black;
+  animation: blink .4s infinite alternate;
+}
+
+@keyframes blink {
+  from { opacity: 1; }
+  to { opacity: .55; }
+}
+
+.meme {
+  position: absolute;
+  font-size: clamp(16px, 2.5vw, 27px);
+  font-weight: bold;
+  text-shadow: 3px 3px black;
+  animation: floaty 1s infinite alternate;
+}
+
+@keyframes floaty {
+  from { transform: rotate(-8deg) scale(1); }
+  to { transform: rotate(8deg) scale(1.1); }
+}
+
+.m1 { left: 6%; top: 35%; color: magenta; }
+.m2 { right: 7%; top: 38%; color: yellow; }
+.m3 { left: 9%; bottom: 17%; color: cyan; }
+.m4 { right: 7%; bottom: 16%; color: red; }
+
+.progressText {
+  color: black;
+  font-size: 17px;
+  padding: 0 10px;
+  font-weight: bold;
+}
+
+.bar {
+  margin: 5px 10px;
+  height: 38px;
+  background: black;
+  border: 3px inset #777;
+  overflow: hidden;
+}
+
+.fill {
+  width: 0%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    #00ff00 0 15px,
+    #008800 15px 18px
+  );
+  transition: width .2s;
+}
+
+.status {
+  color: black;
+  font-size: clamp(17px, 2.4vw, 25px);
+  padding: 6px 12px;
+  font-weight: bold;
+}
+
+/* =========================
+   LOGO STEAM REBOTANDO
+========================= */
+
+#steamLogo {
+  position: fixed;
+  width: 72px;
+  height: 72px;
+  z-index: 30;
+  filter: drop-shadow(0 0 15px cyan);
+  animation: spin 2.2s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =========================
+   PANEL SCANNER
+========================= */
+
+#scannerPanel {
+  position: fixed;
+  right: 18px;
+  top: 18px;
+  z-index: 40;
+  width: min(380px, 90vw);
+  background: rgba(0,0,0,.88);
+  color: #00ff66;
+  border: 3px solid #00ff66;
+  padding: 12px;
+  box-shadow: 0 0 25px lime;
+  font-size: 14px;
+  display: none;
+  animation: glitchPanel .12s infinite alternate;
+}
+
+@keyframes glitchPanel {
+  from { transform: translate(0,0) rotate(-1deg); filter: hue-rotate(0deg); }
+  to { transform: translate(2px,-2px) rotate(1deg); filter: hue-rotate(35deg); }
+}
+
+#scannerPanel h3 {
+  margin: 0 0 8px;
+  color: red;
+  text-shadow: 0 0 8px red;
+}
+
+.safe {
+  color: #fff;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+/* =========================
+   REPRODUCTOR Y ALERTA
+========================= */
+
+.player, .alert {
+  position: fixed;
+  background: #c0c0c0;
+  color: black;
+  border: 3px outset white;
+  font-size: 15px;
+  box-shadow: 0 0 20px #ff00ff;
+  z-index: 25;
+}
+
+.player {
+  left: 20px;
+  bottom: 20px;
+  width: min(360px, 90vw);
+  padding-bottom: 10px;
+}
+
+.smallTitle {
+  background: #0000aa;
+  color: white;
+  padding: 4px;
+  font-weight: bold;
+}
+
+.playerContent {
+  padding: 10px;
+  line-height: 1.6;
+}
+
+.eq {
+  height: 22px;
+  background: repeating-linear-gradient(
+    90deg,
+    lime 0 5px,
+    black 5px 8px
+  );
+  animation: eq .2s infinite alternate;
+}
+
+@keyframes eq {
+  from { width: 70px; }
+  to { width: 160px; }
+}
+
+.alert {
+  right: 35px;
+  bottom: 30px;
+  width: min(335px, 88vw);
+  padding-bottom: 16px;
+}
+
+.alertBody {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 18px;
+  font-weight: bold;
+}
+
+.warning {
+  font-size: 45px;
+}
+
+button {
+  font-family: inherit;
+  font-size: 16px;
+  border: 3px outset white;
+  background: #ddd;
+  cursor: pointer;
+}
+
+/* =========================
+   POPUPS Y FINAL
+========================= */
+
+.fakePop {
+  position: fixed;
+  z-index: 60;
+  background: #c0c0c0;
+  color: black;
+  border: 3px outset white;
+  padding: 10px;
+  font-family: "Courier New", monospace;
+  box-shadow: 0 0 20px magenta;
+  font-weight: bold;
+}
+
+.final {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.94);
+  z-index: 999;
+  place-items: center;
+  text-align: center;
+  font-size: clamp(20px, 3vw, 32px);
+  color: white;
+}
+
+.finalBox {
+  border: 4px solid white;
+  padding: 35px;
+  box-shadow: 0 0 40px magenta;
+  background: #111;
+}
 </style>
 </head>
-<body>
-<div id="bg"></div>
 
-<img id="steam" src="Steam_icon_logo.svg.webp">
+<body>
+
+<!-- MÚSICA -->
 <audio id="music" src="0703.mp3" loop></audio>
 
-<div id="win">
-<div id="title">🧌 INSTALADOR ULTRA PIRATA 3000</div>
-<div id="screen">
-<img id="doom" src="g1ia7k75sva31.gif">
-<img id="troll" src="Trollface.png">
-</div>
-<div id="status">Inicializando caos...</div>
+<!-- PANTALLA CMD -->
+<div id="bootScreen">
+  <div class="bootBox">
+    <div class="ascii">Creado por:
+
+██████╗  █████╗ ███████╗████████╗ █████╗ ██████╗ ██████╗  ██████╗ 
+██╔══██╗██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔══██╗██╔══██╗██╔═══██╗
+██████╔╝███████║███████╗   ██║   ███████║██████╔╝██║  ██║██║   ██║
+██╔══██╗██╔══██║╚════██║   ██║   ██╔══██║██╔══██╗██║  ██║██║   ██║
+██████╔╝██║  ██║███████║   ██║   ██║  ██║██║  ██║██████╔╝╚██████╔╝
+╚═════╝ ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝  ╚═════╝ 
+
+                         IMBÉCIL™</div>
+
+    <div class="bootText">Autor:
+Un bastardo.
+Un imbécil.
+Pero jamás un malware.
+
+Este proyecto existe únicamente para hacerte perder
+30 segundos de tu vida viendo un Trollface bailar.
+
+Si llegaste hasta aquí...
+
+Gracias por caer en la trampa. ❤️</div>
+
+    <div class="cmdLine" id="cmdLine">C:\BASTARDO\IMBECIL&gt; iniciando_desmadre.exe <span class="cursor">&nbsp;</span></div>
+
+    <div class="loadingWrap">
+      <div class="loadingLabel" id="loadingLabel">Cargando vergüenza digital...</div>
+      <div class="loadingBar"><div class="loadingFill" id="loadingFill"></div></div>
+      <div class="bootPercent" id="bootPercent">0%</div>
+    </div>
+  </div>
 </div>
 
-<div id="panel"><b>ANTI PIRATEO MEME SCANNER</b><hr><div id="log"></div></div>
+<!-- PÁGINA TROLL -->
+<div id="mainChaos">
+  <div class="stars"></div>
+  <div class="rgbFog"></div>
+
+  <img id="steamLogo" src="Steam_icon_logo.svg.webp" alt="Steam meme">
+
+  <div class="window" id="win">
+    <div class="titlebar">
+      <div><img src="Steam_icon_logo.svg.webp" alt="">INSTALADOR ULTRA PIRATA 3000</div>
+      <div class="buttons">
+        <span onclick="fakeClose()">_</span>
+        <span onclick="fakeClose()">□</span>
+        <span onclick="fakeClose()">X</span>
+      </div>
+    </div>
+
+    <div class="screen">
+      <img class="doom" src="g1ia7k75sva31.gif" alt="doom dance">
+      <img class="troll" src="Trollface.png" alt="trollface">
+
+      <div class="bigText" id="bigText">
+        INSTALANDO: 100% DE BAILE Y 0% DE VIRUS 😈
+      </div>
+
+      <div class="meme m1">mucho hackeo</div>
+      <div class="meme m2">tu PC = minion</div>
+      <div class="meme m3">WTF XDDD</div>
+      <div class="meme m4">windows llorando</div>
+    </div>
+
+    <div class="progressText" id="progressText">PROGRESO DEL DESASTRE: 0%</div>
+    <div class="bar"><div class="fill" id="fill"></div></div>
+    <div class="status" id="status">ESTADO: esperando que el gato firme contrato...</div>
+  </div>
+
+  <div id="scannerPanel">
+    <h3>⚠️ ANTI-PIRATEO MEME SCANNER ⚠️</h3>
+    <div id="spyInfo"></div>
+    <div class="safe">
+      Tranqui: esto NO sabe tu nombre real, NO sabe tu Steam y NO roba nada.
+      Es puro teatro con datos básicos del navegador + inventos XD
+    </div>
+  </div>
+
+  <div class="player">
+    <div class="smallTitle">REPRODUCTOR CHAFOSO XD</div>
+    <div class="playerContent">
+      🎵 CANCIÓN DEL CAOS.MP3<br>
+      🧌 Artista: DJ Troll.exe<br>
+      💿 Género: Shitpost / Hardbass<br>
+      <button onclick="startMusic()">▶ activar sonido</button>
+      <button onclick="toggleMute()">🔇 mute</button>
+      <div class="eq"></div>
+    </div>
+  </div>
+
+  <div class="alert">
+    <div class="smallTitle">MENSAJE IMPORTANTE</div>
+    <div class="alertBody">
+      <div class="warning">⚠️</div>
+      <div>ERES MUY CURIOS@<br>TE GANASTE ESTO</div>
+    </div>
+    <center><button onclick="fakeClose()">Aceptar</button></center>
+  </div>
+
+  <div class="final" id="final">
+    <div class="finalBox">
+      <h1>FELICIDADES XDDD</h1>
+      <p>Instalaste:</p>
+      <p>✔ 1 trollface bailarín<br>✔ 3 traumas visuales<br>✔ 0 virus reales<br>✔ 100% pérdida de tiempo</p>
+      <button onclick="restartLoop()">VOLVER A CAER EN LA TRAMPA</button>
+    </div>
+  </div>
+</div>
 
 <script>
-music.play().catch(()=>{document.onclick=()=>music.play();},{once:true});
+/* =========================
+   ELEMENTOS
+========================= */
+const bootScreen = document.getElementById("bootScreen");
+const mainChaos = document.getElementById("mainChaos");
+const loadingFill = document.getElementById("loadingFill");
+const bootPercent = document.getElementById("bootPercent");
+const loadingLabel = document.getElementById("loadingLabel");
 
-let wx=80,wy=70,vx=4.5,vy=3.8;
-const w=document.getElementById("win");
+const win = document.getElementById("win");
+const music = document.getElementById("music");
+const fill = document.getElementById("fill");
+const statusText = document.getElementById("status");
+const progressText = document.getElementById("progressText");
+const bigText = document.getElementById("bigText");
+const steamLogo = document.getElementById("steamLogo");
+const scannerPanel = document.getElementById("scannerPanel");
+const spyInfo = document.getElementById("spyInfo");
+const finalScreen = document.getElementById("final");
 
-function loop(){
- wx+=vx; wy+=vy;
- if(wx<0||wx+w.offsetWidth>innerWidth)vx*=-1;
- if(wy<0||wy+w.offsetHeight>innerHeight)vy*=-1;
- w.style.left=wx+"px";
- w.style.top=wy+"px";
- requestAnimationFrame(loop);
-}
-loop();
+/* =========================
+   VARIABLES
+========================= */
+let bootProgress = 0;
+let progress = 0;
+let panic = false;
+let loopStarted = false;
 
-const s=document.getElementById("steam");
-let sx=10,sy=10,svx=6,svy=5;
-function steamLoop(){
- sx+=svx; sy+=svy;
- if(sx<0||sx+64>innerWidth)svx*=-1;
- if(sy<0||sy+64>innerHeight)svy*=-1;
- s.style.left=sx+"px";
- s.style.top=sy+"px";
- requestAnimationFrame(steamLoop);
-}
-steamLoop();
+let x = 90;
+let y = 70;
+let vx = 5;
+let vy = 4;
 
-const msgs=[
-"Conectando con la NASA...",
-"Descargando más RAM...",
-"Hackeando el refrigerador...",
-"Leyendo pensamientos...",
-"Consultando al gato supremo...",
-"Steam se está riendo...",
-"Compilando memes..."
+let sx = 20;
+let sy = 20;
+let svx = 7;
+let svy = 6;
+
+const bootLabels = [
+  "Cargando vergüenza digital...",
+  "Compilando estupidez...",
+  "Invocando Trollface...",
+  "Sincronizando DoomGuy con el cringe...",
+  "Descargando RAM imaginaria...",
+  "Contactando a Steam para que se ría...",
+  "Preparando desmadre infinito..."
 ];
-let i=0;
-setInterval(()=>{
-document.getElementById("status").textContent=msgs[i++%msgs.length];
-},1200);
 
-setTimeout(()=>{
-panel.style.display="block";
-log.innerHTML=`
-Usuario: Tremendo Piratón<br>
-Steam: xX_NoEraVirus_Xx<br>
-PC: Tostadora Gamer RGB<br>
-Pantalla: ${screen.width}x${screen.height}<br>
-Idioma: ${navigator.language}<br>
-SO: ${navigator.platform}<br>
-Zona: ${Intl.DateTimeFormat().resolvedOptions().timeZone}<hr>
-<b style="color:red">Resultado: Culpable de hacer click XD</b>`;
-},3500);
-
-const pops=[
-"Descargando RAM...",
-"Hackeando el gato...",
-"DOOMGUY APROBÓ EL BAILE",
-"Esto es una broma XD",
-"Windows está confundido"
+const messages = [
+  "ESTADO: calibrando pasos prohibidos...",
+  "ESTADO: consultando al gato supremo...",
+  "ESTADO: instalando absolutamente nada...",
+  "ESTADO: el trollface tomó el control del ritmo...",
+  "ESTADO: cargando cringe premium...",
+  "ESTADO: Windows está considerando renunciar...",
+  "ESTADO: descargando más WTF...",
+  "ESTADO: hackeo falso en progreso...",
+  "ESTADO: verificando sentido del humor...",
+  "ESTADO: bailando como si fuera 2009..."
 ];
-setInterval(()=>{
-const d=document.createElement("div");
-d.className="fake";
-d.textContent=pops[Math.floor(Math.random()*pops.length)];
-d.style.left=Math.random()*(innerWidth-220)+"px";
-d.style.top=Math.random()*(innerHeight-80)+"px";
-document.body.appendChild(d);
-setTimeout(()=>d.remove(),2200);
-},900);
+
+const bigTexts = [
+  "INSTALANDO: 100% DE BAILE Y 0% DE VIRUS 😈",
+  "NO INTENTES ENTENDERLO... ES ARTE 🐱",
+  "DESCARGANDO TREMENDO SHITPOST...",
+  "TU PC ESTÁ BIEN, TU DIGNIDAD NO",
+  "MODO TROLLFACE ACTIVADO XDDD",
+  "NO PUEDES ESCAPAR DEL BAILE"
+];
+
+const fakeNames = [
+  "Capitán Torrent",
+  "El Piratón 3000",
+  "Usuario Sospechoso",
+  "DoomGuy Chafa",
+  "Tremendo Curioso",
+  "Lord Descargas"
+];
+
+const fakeSteam = [
+  "xX_NoEraVirus_Xx",
+  "GatoGamerCR",
+  "DoomPirata69",
+  "SteamNoMeBanees",
+  "TrollFacePlayer",
+  "DescargaGratisReal"
+];
+
+const fakePc = [
+  "Tostadora Gamer RGB",
+  "PC del OIJ versión meme",
+  "Laptop con miedo",
+  "Windows llorando edition",
+  "Pentium con esteroides",
+  "Máquina de descargar RAM"
+];
+
+const popupTexts = [
+  "Descargando RAM...",
+  "Hackeando el gato...",
+  "Steam dijo: JAJAJA",
+  "Pirateo detectado: nivel tamal",
+  "Instalando vergüenza...",
+  "Tu PC está bien, tu honor no XD",
+  "DoomGuy aprobó el baile",
+  "Conectando con la NASA...",
+  "Hackeando el refrigerador...",
+  "Leyendo pensamientos falsos..."
+];
+
+/* =========================
+   AUDIO
+========================= */
+function startMusic() {
+  music.volume = 0.75;
+  music.play().catch(() => {});
+}
+
+function toggleMute() {
+  music.muted = !music.muted;
+}
+
+document.addEventListener("click", startMusic, { once: true });
+
+/* =========================
+   BOOT CMD
+========================= */
+function startBoot() {
+  bootProgress = 0;
+  loadingFill.style.width = "0%";
+  bootPercent.textContent = "0%";
+  loadingLabel.textContent = bootLabels[0];
+  bootScreen.style.display = "flex";
+  bootScreen.style.opacity = "1";
+  mainChaos.classList.remove("active");
+  finalScreen.style.display = "none";
+
+  const bootTimer = setInterval(() => {
+    bootProgress += Math.floor(Math.random() * 5) + 2;
+    if (bootProgress > 100) bootProgress = 100;
+
+    loadingFill.style.width = bootProgress + "%";
+    bootPercent.textContent = bootProgress + "%";
+    loadingLabel.textContent = bootLabels[Math.floor(Math.random() * bootLabels.length)];
+
+    if (bootProgress >= 100) {
+      clearInterval(bootTimer);
+      setTimeout(showChaos, 800);
+    }
+  }, 130);
+}
+
+/* =========================
+   MOSTRAR PÁGINA TROLL
+========================= */
+function showChaos() {
+  bootScreen.style.display = "none";
+  mainChaos.classList.add("active");
+  startMusic();
+
+  progress = 0;
+  fill.style.width = "0%";
+  progressText.textContent = "PROGRESO DEL DESASTRE: 0%";
+  statusText.textContent = "ESTADO: esperando que el gato firme contrato...";
+  scannerPanel.style.display = "none";
+  spyInfo.innerHTML = "";
+
+  startScanner();
+  startProgress();
+
+  if (!loopStarted) {
+    loopStarted = true;
+    bounceWindow();
+    bounceSteam();
+    popupSpam();
+  }
+}
+
+/* =========================
+   VENTANA REBOTANDO
+========================= */
+function bounceWindow() {
+  const ww = win.offsetWidth;
+  const wh = win.offsetHeight;
+
+  x += vx;
+  y += vy;
+
+  if (x <= 0 || x + ww >= innerWidth) {
+    vx *= -1;
+    chaosFlash();
+  }
+
+  if (y <= 0 || y + wh >= innerHeight) {
+    vy *= -1;
+    chaosFlash();
+  }
+
+  win.style.left = x + "px";
+  win.style.top = y + "px";
+  win.style.transform = `rotate(${Math.sin(Date.now()/120) * 5}deg) scale(${panic ? 1.03 : 1})`;
+
+  requestAnimationFrame(bounceWindow);
+}
+
+/* =========================
+   LOGO STEAM REBOTANDO
+========================= */
+function bounceSteam() {
+  sx += svx;
+  sy += svy;
+
+  if (sx <= 0 || sx + 72 >= innerWidth) {
+    svx *= -1;
+    chaosFlash();
+  }
+
+  if (sy <= 0 || sy + 72 >= innerHeight) {
+    svy *= -1;
+    chaosFlash();
+  }
+
+  steamLogo.style.left = sx + "px";
+  steamLogo.style.top = sy + "px";
+
+  requestAnimationFrame(bounceSteam);
+}
+
+function chaosFlash() {
+  document.body.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 8%)`;
+}
+
+/* =========================
+   PROGRESO BUCLE
+========================= */
+function startProgress() {
+  const timer = setInterval(() => {
+    if (!mainChaos.classList.contains("active")) {
+      clearInterval(timer);
+      return;
+    }
+
+    progress += Math.floor(Math.random() * 7) + 4;
+    if (progress > 100) progress = 100;
+
+    fill.style.width = progress + "%";
+    progressText.textContent = "PROGRESO DEL DESASTRE: " + progress + "%";
+    statusText.textContent = messages[Math.floor(Math.random() * messages.length)];
+    bigText.textContent = bigTexts[Math.floor(Math.random() * bigTexts.length)];
+
+    if (progress >= 100) {
+      clearInterval(timer);
+      setTimeout(() => {
+        finalScreen.style.display = "grid";
+      }, 1500);
+
+      setTimeout(() => {
+        restartLoop();
+      }, 6500);
+    }
+  }, 1000);
+}
+
+/* =========================
+   SCANNER MEME
+========================= */
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function startScanner() {
+  const lines = [
+    "[OK] Escaneando botón sospechoso...",
+    "[OK] Detectando nivel de pirateo...",
+    "[WARN] Usuario demasiado curioso...",
+    "[OK] Activando susto falso...",
+    "[OK] Cargando datos inventados...",
+    "[ERROR] Steam se está riendo...",
+    "[OK] Mostrando teatro hacker..."
+  ];
+
+  const data = {
+    usuario: pick(fakeNames),
+    steam: pick(fakeSteam),
+    pc: pick(fakePc),
+    navegador: navigator.userAgent.split(" ").slice(-3).join(" "),
+    idioma: navigator.language,
+    plataforma: navigator.platform,
+    pantalla: screen.width + "x" + screen.height,
+    zona: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    hora: new Date().toLocaleTimeString()
+  };
+
+  let i = 0;
+
+  setTimeout(() => {
+    scannerPanel.style.display = "block";
+    const interval = setInterval(() => {
+      if (!mainChaos.classList.contains("active")) {
+        clearInterval(interval);
+        return;
+      }
+
+      if (i < lines.length) {
+        spyInfo.innerHTML += `<div>${lines[i]}</div>`;
+        i++;
+      } else {
+        clearInterval(interval);
+        spyInfo.innerHTML += `
+          <hr>
+          <div>👤 USUARIO: ${data.usuario}</div>
+          <div>💻 PC: ${data.pc}</div>
+          <div>🎮 STEAM: ${data.steam}</div>
+          <div>🌐 NAVEGADOR: ${data.navegador}</div>
+          <div>🖥️ PANTALLA: ${data.pantalla}</div>
+          <div>🗣️ IDIOMA: ${data.idioma}</div>
+          <div>🧱 SISTEMA: ${data.plataforma}</div>
+          <div>🕒 ZONA: ${data.zona}</div>
+          <div>⏰ HORA DEL CRIMEN: ${data.hora}</div>
+          <hr>
+          <div style="color:red">RESULTADO: culpable de hacer click XD</div>
+        `;
+      }
+    }, 600);
+  }, 2200);
+}
+
+/* =========================
+   POPUPS FALSOS
+========================= */
+function popupSpam() {
+  setInterval(() => {
+    if (!mainChaos.classList.contains("active")) return;
+
+    const p = document.createElement("div");
+    p.className = "fakePop";
+    p.textContent = pick(popupTexts);
+    p.style.left = Math.random() * Math.max(1, innerWidth - 270) + "px";
+    p.style.top = Math.random() * Math.max(1, innerHeight - 110) + "px";
+    document.body.appendChild(p);
+
+    setTimeout(() => p.remove(), 2500);
+  }, 780);
+}
+
+/* =========================
+   BOTONES FALSOS
+========================= */
+function fakeClose() {
+  panic = true;
+  statusText.textContent = "ESTADO: JAJAJA EL BOTÓN NO ERA DE VERDAD 😭";
+  bigText.textContent = "NO PUEDES CERRAR EL BAILE";
+  setTimeout(() => panic = false, 1300);
+}
+
+/* =========================
+   REINICIAR BUCLE INFINITO
+========================= */
+function restartLoop() {
+  finalScreen.style.display = "none";
+  mainChaos.classList.remove("active");
+
+  setTimeout(() => {
+    startBoot();
+  }, 700);
+}
+
+/* =========================
+   EASTER EGGS
+========================= */
+document.addEventListener("keydown", e => {
+  const key = e.key.toLowerCase();
+
+  if (key === "m") toggleMute();
+
+  if (key === "j") {
+    bigText.textContent = "MODO JIREN ACTIVADO POR 3 SEGUNDOS 🔥";
+    win.style.boxShadow = "0 0 60px red, 0 0 120px orange";
+    setTimeout(() => {
+      win.style.boxShadow = "0 0 35px #00ffff, 0 0 80px #ff00ff";
+    }, 3000);
+  }
+
+  if (key === "escape") {
+    fakeClose();
+  }
+});
+
+/* INICIAR */
+startBoot();
 </script>
 </body>
 </html>
